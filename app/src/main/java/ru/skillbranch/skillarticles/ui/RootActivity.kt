@@ -1,8 +1,8 @@
 package ru.skillbranch.skillarticles.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.appcompat.widget.Toolbar
@@ -41,9 +41,9 @@ class RootActivity : AppCompatActivity() {
     }
 
     private fun setupSubenu() {
-        btn_text_up.setOnClickListener { viewModel.handleTextUp() }
-        btn_text_down.setOnClickListener { viewModel.handleTextDown() }
-        switch_mode.setOnClickListener { viewModel.handleDarkMode() }
+        btn_text_up.setOnClickListener { viewModel.handleUpText() }
+        btn_text_down.setOnClickListener { viewModel.handleDownText() }
+        switch_mode.setOnClickListener { viewModel.handleNightMode() }
     }
 
     private fun setupBottomBar() {
