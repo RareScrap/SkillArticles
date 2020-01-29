@@ -138,7 +138,7 @@ class RootActivity : AppCompatActivity() {
             it.width = dpToIntPx(40)
             it.height = dpToIntPx(40)
             it.marginEnd = dpToIntPx(16)
-            logo?.layoutParams = it
+            logo.layoutParams = it
         }
     }
 
