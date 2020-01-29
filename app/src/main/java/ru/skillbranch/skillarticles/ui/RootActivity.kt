@@ -1,10 +1,13 @@
 package ru.skillbranch.skillarticles.ui
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
@@ -121,5 +124,18 @@ class RootActivity : AppCompatActivity() {
             it.marginEnd = dpToIntPx(16)
             logo?.layoutParams = it
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.root_activity_menu, menu)
+        val searchView = menu?.findItem(R.id.action_search)?.actionView as SearchView
+        searchView.maxWidth = Integer.MAX_VALUE
+        //setupSearchView(searchView!!)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_search) viewModel.handleSearchMode(true)
+        return true
     }
 }
