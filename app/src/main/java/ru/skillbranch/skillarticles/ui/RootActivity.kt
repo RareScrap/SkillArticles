@@ -110,6 +110,22 @@ class RootActivity : AppCompatActivity() {
         snackbar.show()
     }
 
+    private fun setupSearchView(searchView: SearchView, data: ArticleState) {
+        searchView.maxWidth = Integer.MAX_VALUE // Занимаем весь улбар
+        searchView.queryHint = "Введите запрос"
+        searchView.setQuery(data.searchQuery, false)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.handleSearch(newText)
+                return true
+            }
+        })
+    }
+
     private fun setupActionBar() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -128,9 +144,21 @@ class RootActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.root_activity_menu, menu)
-        val searchView = menu?.findItem(R.id.action_search)?.actionView as SearchView
-        searchView.maxWidth = Integer.MAX_VALUE
-        //setupSearchView(searchView!!)
+        val searchItem =  menu?.findItem(R.id.action_search)!!
+        val searchView = searchItem.actionView as SearchView
+        viewModel.observeOnce(this, onChanged = {
+            if (it.isSearch) searchItem.expandActionView() // Предварительный экспанд не позволит вьюхе поиска очистить текст при сетапе
+            searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener { // TODO: Жаль что setOnCloseListener() не работает
+                override fun onMenuItemActionExpand(item: MenuItem?): Boolean = true
+
+                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                    viewModel.handleSearchMode(false)
+                    return true
+                }
+            })
+
+            setupSearchView(searchView, it)
+        })
         return true
     }
 
