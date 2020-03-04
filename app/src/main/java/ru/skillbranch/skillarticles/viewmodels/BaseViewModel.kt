@@ -14,7 +14,7 @@ abstract class BaseViewModel<T>(initState: T) : ViewModel() {
      * и обновлять состояние ViewModel исходя из полученных данных
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    protected val state: MediatorLiveData<T> = MediatorLiveData<T>().apply {
+    val state: MediatorLiveData<T> = MediatorLiveData<T>().apply {
         value = initState
     }
 

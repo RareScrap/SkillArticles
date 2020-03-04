@@ -19,6 +19,7 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
                 shareLink = article.shareLink, // TODO: Она же null будет!
                 title = article.title,
                 category = article.category,
+                author = article.author,
                 categoryIcon = article.categoryIcon,
                 date = article.date.format()
             )
@@ -81,19 +82,23 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
     }
 
     override fun handleSearchMode(isSearch: Boolean) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        updateState { it.copy(isSearch = isSearch) }
     }
 
     override fun handleSearch(query: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        updateState { it.copy(searchQuery = query) }
     }
 
     override fun handleShare() {
-
+        notify(Notify.ActionMessage("Share is not implemented", "OK", actionHandler = {}))
+        val msg = Notify.ErrorMessage("Share is not implemented", "OK", null)
+        notify(msg)
     }
 
     override fun handleBookmark() {
-
+        repository.updateArticlePersonalInfo(currentState.toArticlePersonalInfo().copy(isBookmark = !currentState.isBookmark))
+        val msg = Notify.TextMessage(if (currentState.isBookmark) "Add to bookmarks" else "Remove from bookmarks")
+        notify(msg)
     }
 
     override fun handleLike() {
@@ -105,7 +110,7 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         toggleLike()
 
         val msg = if (currentState.isLike) Notify.TextMessage("Mark as liked")
-        else Notify.ActionMessage("Don't like it anymore", "No, still like it", toggleLike)
+        else Notify.ActionMessage("Don`t like it anymore", "No, still like it", toggleLike)
 
         notify(msg)
     }
