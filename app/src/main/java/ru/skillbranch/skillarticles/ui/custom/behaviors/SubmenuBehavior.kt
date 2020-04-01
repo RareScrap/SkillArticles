@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.ui.custom.behavior
+package ru.skillbranch.skillarticles.ui.custom.behaviors
 
 import android.content.Context
 import android.util.AttributeSet
