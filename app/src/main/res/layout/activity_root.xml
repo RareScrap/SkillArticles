@@ -52,10 +52,12 @@
         android:visibility="gone"
         tools:visibility="visible"/>
 
+    <!--minHeight используется в кастомном бехевиоре-->
     <ru.skillbranch.skillarticles.ui.custom.Bottombar
         android:id="@+id/bottombar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:minHeight="56dp"
         android:layout_gravity="bottom"
         android:theme="@style/ArticleBarsTheme"
         android:elevation="4dp"
