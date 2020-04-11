@@ -46,10 +46,13 @@
         <item name="android:background">@drawable/ripple</item> <!-- Анимация кружоком при нажатии, как принято в Material Design-->
     </style>
 
+    <style name="BottombarIcon.Search">
+        <item name="android:tint">@color/tint_search_color</item>
+    </style>
+
     <!-- Т.к. в стандартном снекбаре игнорируются (переопределяются) доджи при указании якоря,
          мы пишем свой стиль который снова выставит снекбару нужные параметры -->
     <style name="CustomSnackbar" parent="Widget.MaterialComponents.Snackbar">
         <item name="layout_insetEdge">bottom</item>
     </style>
-
 </resources>
