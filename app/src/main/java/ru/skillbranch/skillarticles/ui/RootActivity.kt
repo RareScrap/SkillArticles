@@ -9,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
@@ -42,10 +43,12 @@ class RootActivity : BaseActvity<ArticleViewModel>(), IArticleView {
         val vmFactory = ViewModelFactory("0")
         ViewModelProviders.of(this, vmFactory).get(ArticleViewModel::class.java)
     }
-    override val binding: ArticleBinding by lazy { ArticleBinding() }
+    override public val binding: ArticleBinding by lazy { ArticleBinding() }
 
-    private val bgColor by AttrValue(R.attr.colorSecondary) // TODO: А зачем вообще делегат?
-    private val fgColor by AttrValue(R.attr.colorOnSecondary)
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val bgColor by AttrValue(R.attr.colorSecondary) // TODO: А зачем вообще делегат?
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val fgColor by AttrValue(R.attr.colorOnSecondary)
 
     // TODO: Почему нам больше не понаобится onCreate? ведь в родителе не вызывается фабрика
 //    override fun onCreate(savedInstanceState: Bundle?) {
