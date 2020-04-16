@@ -5,9 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
+import ru.skillbranch.skillarticles.viewmodels.base.ViewModelDelegate
 
 // TODO: Что означают эти дженерики?
-abstract class BaseActvity<T: BaseViewModel<out IViewModelState>> : AppCompatActivity() {
+abstract class BaseActivity<T: BaseViewModel<out IViewModelState>> : AppCompatActivity() {
     protected abstract val binding:Binding
     protected abstract val viewModel : T
     protected abstract val layout:Int
