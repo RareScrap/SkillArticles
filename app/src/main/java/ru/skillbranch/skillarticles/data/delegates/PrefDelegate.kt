@@ -19,11 +19,11 @@ class PrefDelegate<T>(private val defaultValue: T) : ReadWriteProperty<PrefManag
 
     override fun setValue(thisRef: PrefManager, property: KProperty<*>, value: T?) {
         when (defaultValue) {
-            is Int -> thisRef.preferences.edit().putInt(property.name, defaultValue as Int).apply()
-            is Boolean -> thisRef.preferences.edit().putBoolean(property.name, defaultValue as Boolean).apply()
-            is Float -> thisRef.preferences.edit().putFloat(property.name, defaultValue as Float).apply()
-            is String -> thisRef.preferences.edit().putString(property.name, defaultValue as String).apply()
-            is Long -> thisRef.preferences.edit().putLong(property.name, defaultValue as Long).apply()
+            is Int -> thisRef.preferences.edit().putInt(property.name, value as Int).apply()
+            is Boolean -> thisRef.preferences.edit().putBoolean(property.name, value as Boolean).apply()
+            is Float -> thisRef.preferences.edit().putFloat(property.name, value as Float).apply()
+            is String -> thisRef.preferences.edit().putString(property.name, value as String).apply()
+            is Long -> thisRef.preferences.edit().putLong(property.name, value as Long).apply()
             else -> throw RuntimeException("Ебанный пиздец. Я попаду в ад за это")
         }
     }
