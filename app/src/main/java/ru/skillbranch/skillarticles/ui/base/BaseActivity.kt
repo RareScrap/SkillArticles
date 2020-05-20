@@ -39,6 +39,8 @@ abstract class BaseActivity<T: BaseViewModel<out IViewModelState>> : AppCompatAc
         binding.restoreUi(savedInstanceState)
     }
 
+    // TODO: Зачем оно мне надо, если я не юзаю это для инциализации viewModel? Просто шоб проходили тесты? втф?
+    // TODO: Как работает reified?
     internal inline fun <reified T: ViewModel> provideViewModel(arg : Any?) : ViewModelDelegate<T> {
         return ViewModelDelegate(T::class.java, arg)
     }
