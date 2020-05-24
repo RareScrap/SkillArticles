@@ -54,10 +54,6 @@ abstract class BaseViewModel<T: IViewModelState>(initState: T) : ViewModel() {
         state.observe(owner, Observer { onChanged(it!!) })
     }
 
-    fun observeOnce(owner: LifecycleOwner, onChanged: (newState: T) -> Unit) {
-        state.observeOnce(owner, Observer { onChanged(it!!) })
-    }
-
     /***
      * более компактная форма записи observe() метода LiveData вызывает лямбда выражение обработчик
      * только в том случае если уведомление не было уже обработанно ранее,
@@ -136,13 +132,4 @@ sealed class Notify(val message: String) {
         val errLabel: String?,
         val errHandler: (() -> Unit)?
     ) : Notify(msg)
-}
-
-fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>) {
-    observe(lifecycleOwner, object : Observer<T> {
-        override fun onChanged(t: T) {
-            observer.onChanged(t)
-            removeObserver(this)
-        }
-    })
 }

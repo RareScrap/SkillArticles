@@ -256,20 +256,39 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
     // TODO: У меня фокус клавы сохраняется, в отличии от видео. См 1:25:54
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.root_activity_menu, menu)
+        val menuItem = menu?.findItem(R.id.action_search)
         val searchItem =  menu?.findItem(R.id.action_search)!!
-        val searchView = searchItem.actionView as SearchView
-        viewModel.observeOnce(this, onChanged = {
-            if (it.isSearch) searchItem.expandActionView() // Предварительный экспанд не позволит вьюхе поиска очистить текст при сетапе
-            searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener { // TODO: Жаль что setOnCloseListener() не работает
-                override fun onMenuItemActionExpand(item: MenuItem?): Boolean = true
+        val searchView = menuItem?.actionView as? SearchView
 
-                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                    viewModel.handleSearchMode(false)
-                    return true
-                }
-            })
+        if (binding.isSearch) {
+            menuItem?.expandActionView()
+            searchView?.setQuery(binding.searchQuery, false)
+            if(binding.isFocusedSearch) searchView?.requestFocus()
+            else searchView?.clearFocus()
+        }
 
-            setupSearchView(searchView, it)
+        menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                viewModel.handleSearchMode(true)
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                viewModel.handleSearchMode(false)
+                return true
+            }
+        })
+
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.handleSearch(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.handleSearch(newText)
+                return true
+            }
         })
         return true
     }
@@ -281,7 +300,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
 
     inner class ArticleBinding : Binding() {
         var isFocusedSearch: Boolean = false
-//        private var searchQuery: String? = null // TODO: Почему у меня работает без этого?
+        var searchQuery: String? = null
         var isLoadingContent by ObserveProp(true)
 
         private var isLike: Boolean by RenderProp(false) {btn_like.isChecked = it}
@@ -361,7 +380,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
 
             isLoadingContent = data.isLoadingContent
             isSearch = data.isSearch
-//            searchQuery = data.searchQuery // TODO: Разобраться где должна объявляться searchQuery
+            searchQuery = data.searchQuery
             searchPosition = data.searchPosition
             searchResults = data.searchResults
         }
