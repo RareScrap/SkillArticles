@@ -38,7 +38,7 @@ import ru.skillbranch.skillarticles.viewmodels.base.Notify
 import ru.skillbranch.skillarticles.viewmodels.base.ViewModelFactory
 
 class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
-    override val layout: Int = R.layout.activity_root // TODO: Как устроен оверрайд свойств?
+    override val layout: Int = R.layout.activity_root // по сути, это оверрайд геттера из суперкласса
     override val viewModel: ArticleViewModel by lazy {
         val vmFactory = ViewModelFactory("0")
         ViewModelProviders.of(this, vmFactory).get(ArticleViewModel::class.java)
