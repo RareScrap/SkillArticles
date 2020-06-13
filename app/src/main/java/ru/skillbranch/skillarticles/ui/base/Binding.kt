@@ -4,8 +4,12 @@ import android.os.Bundle
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import kotlin.reflect.KProperty
+import ru.skillbranch.skillarticles.ui.RootActivity.ArticleBinding
 
-// TODO: Что этот класс вообще делает?
+/**
+ * Биндинг это то, что определяет способ отрисовки элементов стейта.
+ * См. [ArticleBinding] для примера конкретной реализации
+ */
 abstract class Binding {
     val delegates = mutableMapOf<String, RenderProp<out Any>>()
 

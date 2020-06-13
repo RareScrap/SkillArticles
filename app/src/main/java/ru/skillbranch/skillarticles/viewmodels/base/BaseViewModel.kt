@@ -5,6 +5,10 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 
+/*
+Важно сказать, что вьюмодель ничего не отрисовывает, она передаёт наш стейт в
+биндинг, который уже отрисовывает его.
+ */
 abstract class BaseViewModel<T: IViewModelState>(initState: T) : ViewModel() {
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val notifications = MutableLiveData<Event<Notify>>()

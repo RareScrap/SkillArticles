@@ -298,6 +298,11 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         return true
     }
 
+    /**
+     * по отдельности(через RenderProp)
+     * или в зависимости друг от друга(через dependsOn)
+     */
+    // TODO: Как устроены ObserveProp и RenderProp
     inner class ArticleBinding : Binding() {
         var isFocusedSearch: Boolean = false
         var searchQuery: String? = null
