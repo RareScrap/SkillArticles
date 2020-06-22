@@ -1,7 +1,9 @@
 package ru.skillbranch.skillarticles.extensions
 
+// Другие решения, поредложенные SO:
+// https://stackoverflow.com/questions/62189457/get-indexes-of-substrings-contained-in-a-string-in-kotlin-way/
 public fun String?.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
-    var list = mutableListOf<Int>() // TODO: Чекнуть другие решения
+    var list = mutableListOf<Int>()
     if (substr.isNullOrBlank()) return list
     var count = 0;
     this?.split(substr, ignoreCase = ignoreCase)?.forEach {
