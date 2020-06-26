@@ -148,6 +148,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         btn_result_down.setOnClickListener {
             search_view?.let {
                 if (it.hasFocus()) it.clearFocus()
+                // TODO: Урок 5 (46:36) - о каком баге идет речь? У меня описанное не проявлялось
             }
             viewModel.handleDownResult()
         }
