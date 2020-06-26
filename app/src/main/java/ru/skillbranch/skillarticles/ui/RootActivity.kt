@@ -138,12 +138,17 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         btn_settings.setOnClickListener { viewModel.handleToggleMenu() }
 
         btn_result_up.setOnClickListener {
-            if (search_view.hasFocus()) search_view.clearFocus()
+            // TODO: Почему в видео нет проверки на null и все работает?
+            search_view?.let {
+                if (it.hasFocus()) it.clearFocus()
+            }
             viewModel.handleUpResult()
         }
 
         btn_result_down.setOnClickListener {
-            if (search_view.hasFocus()) search_view.clearFocus()
+            search_view?.let {
+                if (it.hasFocus()) it.clearFocus()
+            }
             viewModel.handleDownResult()
         }
 
