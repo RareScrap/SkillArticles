@@ -30,7 +30,8 @@ abstract class BaseViewModel<T: IViewModelState>(initState: T) : ViewModel() {
     protected val currentState
         get() = state.value!!
 
-    /***
+    // В котлине нет комметарием, начинающихся с "/***"
+    /**
      * лямбда выражение принимает в качестве аргумента текущее состояние и возвращает
      * модифицированное состояние, которое присваивается текущему состоянию
      */
