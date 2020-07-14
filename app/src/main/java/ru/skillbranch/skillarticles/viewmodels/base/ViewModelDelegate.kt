@@ -10,9 +10,16 @@ class ViewModelDelegate<T : ViewModel>(
     private val clazz: Class<T>,
     private val arg: Any?
 ) : ReadOnlyProperty<FragmentActivity, T> {
+    // Мое решение, в отличии от решения в лекции (урок 5, 49:12) не запоминало уже
+    // иницилизрованную вьюмодель и пересоздавала его. Я отказался от моего решения
+    // в пользу решения Михаила.
+    private lateinit var value: T
+
     override fun getValue(thisRef: FragmentActivity, property: KProperty<*>): T {
-        if (arg == null) return ViewModelProviders.of(thisRef).get(clazz)
-        val vmFactory = ViewModelFactory(arg)
-        return ViewModelProviders.of(thisRef, vmFactory).get(clazz)
+        if (!::value.isInitialized) value = when (arg) {
+            null -> ViewModelProviders.of(thisRef).get(clazz)
+            else -> ViewModelProviders.of(thisRef, ViewModelFactory(arg)).get(clazz)
+        }
+        return value
     }
 }
