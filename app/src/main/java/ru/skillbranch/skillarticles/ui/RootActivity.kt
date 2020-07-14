@@ -141,15 +141,18 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             // TODO: Почему в видео нет проверки на null и все работает?
             search_view?.let {
                 if (it.hasFocus()) it.clearFocus()
+
             }
+            // Мы ревестируем фокус чтобы скрол-вью промотался до нужного там фрагмента поиска
+            if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
             viewModel.handleUpResult()
         }
 
         btn_result_down.setOnClickListener {
             search_view?.let {
                 if (it.hasFocus()) it.clearFocus()
-                // TODO: Урок 5 (46:36) - о каком баге идет речь? У меня описанное не проявлялось
             }
+            if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
             viewModel.handleDownResult()
         }
 
