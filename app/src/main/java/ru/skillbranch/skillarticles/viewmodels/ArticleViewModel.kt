@@ -57,7 +57,7 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
     }
 
     // TODO: Зачем этим методы вообще нужны? Ведь у нас данные из репы не в rx-последовательностях приходят, а уже в livedata'е
-    override fun getArticleContent(): LiveData<List<Any>?> {
+    override fun getArticleContent(): LiveData<String?> {
         return repository.loadArticleContent(articleId)
     }
 
@@ -94,8 +94,10 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
     override fun handleSearch(query: String?) {
         query ?: return // TODO: Нужно?
         // TODO: Что такое "?"
-        val result = (currentState.content.firstOrNull() as? String).indexesOf(query)
+        val result = currentState.content
+            .indexesOf(query)
             .map{ it to it + query.length }
+        // TODO: Урок 5 (46:57) - у меня такой баг не появлятся. Честно, я даже не понял о чем он говорит
         updateState { it.copy(searchQuery = query, searchResults = result) }
     }
 
@@ -155,7 +157,7 @@ data class ArticleState(
     val date: String? = null, // дата публикации
     val author: Any? = null, // автор статьи
     val poster: String? = null, // Обложка статьи
-    val content: List<Any> = emptyList(), // контент // TODO: Почему Any?
+    val content: String? = null, // контент
     val reviews: List<Any> = emptyList() // комментарии
 ) : IViewModelState {
     override fun save(outState: Bundle) {

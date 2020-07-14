@@ -385,7 +385,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             if (data.title != null) title = data.title // TODO: Можно ли сделать проверку на нул силами котлина?
             if (data.category != null) category = data.category // TODO: Можно ли сделать проверку на нул силами котлина?
             if (data.categoryIcon != null) categoryIcon = data.categoryIcon as Int// TODO: Можно ли сделать проверку на нул силами котлина?
-            if (data.content.isNotEmpty()) content = data.content.first() as String
+            if (data.content != null) content = data.content.first() as String
 
             isLoadingContent = data.isLoadingContent
             isSearch = data.isSearch
