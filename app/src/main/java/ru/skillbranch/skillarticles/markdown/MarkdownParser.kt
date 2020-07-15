@@ -4,18 +4,25 @@ import java.util.regex.Pattern
 
 object MarkdownParser {
 
-    private val LINE_SEPARATOR = "\n"
+    // TODO: Почему в коде, приложенным к лекции не юзается getProperty()?
+    private val LINE_SEPARATOR = System.getProperty("line.separator") ?: "\n"
 
     //group regex
-    private const val UNORDERED_LIST_ITEM_GROUP = "" //TODO implement me
-    private const val HEADER_GROUP = "" //TODO implement me
-    private const val QUOTE_GROUP = "" //TODO implement me
-    private const val ITALIC_GROUP = "" //TODO implement me
-    private const val BOLD_GROUP ="" //TODO implement me
-    private const val STRIKE_GROUP = "" //TODO implement me
-    private const val RULE_GROUP = "" //TODO implement me
-    private const val INLINE_GROUP = "" //TODO implement me
-    private const val LINK_GROUP = "" //TODO implement me
+    private const val UNORDERED_LIST_ITEM_GROUP = "(^[*+-] .+$)"
+    private const val HEADER_GROUP = "(^#{1,6} .+?$)" // TODO: Зачем нужен "?"
+    private const val QUOTE_GROUP = "(^> .+?$)"
+    // "*?" нужен чтобы брать только одну звездочку слева направа и пропускать следющие за ней звездочки (*text****)
+    // TODO: почему бы не юзать (\*[^*].*?\*)?
+    // TODO: Понять эту регулярку
+    private const val ITALIC_GROUP = "((?<!\\*)\\*[^*].*?[^*]?\\*(?!\\*)|(?<!_)_[^_].*?[^_]?_(?!_))"
+    // TODO: Почему моя регулярка тоже проходит тест? "(\\*{2}.*?\\*{2}|_{2}.*?_{2})"
+    private const val BOLD_GROUP = "((?<!\\*)\\*{2}[^*].*?[^*]?\\*{2}(?!\\*)|(?<!_)_{2}[^_].*?[^_]?_{2}(?!_))"
+    // TODO: Почему мне не понадобились всякие ретроспективные проверки?
+    private const val STRIKE_GROUP = "(~{2}.*?~{2})"
+    private const val RULE_GROUP = "(^[-_*]{3}$)"
+    private const val INLINE_GROUP = "((?<!`)`[^`\\s].*?[^`\\s]?`(?!`))"
+    // TODO: зачем нам вторая часть регулярки если первая и так проходит тест?
+    private const val LINK_GROUP = "(\\[[^\\[\\]]*?]\\(.+?\\)|^\\[*?]\\(.*?\\))" // мое решение - "(\\[.*\\]\\(.*\\))"
     private const val BLOCK_CODE_GROUP = "" //TODO implement me
     private const val ORDER_LIST_GROUP = "" //TODO implement me
 
@@ -30,83 +37,150 @@ object MarkdownParser {
      * parse markdown text to elements
      */
     fun parse(string: String): MarkdownText {
-        //TODO implement me
+        val elements = mutableListOf<Element>()
+        elements.addAll(findElements(string))
+        return MarkdownText(elements)
     }
 
     /**
      * clear markdown text to string without markdown characters
      */
     fun clear(string: String?): String? {
-        //TODO implement me
+        return null
     }
 
     /**
      * find markdown elements in markdown text
      */
     private fun findElements(string: CharSequence): List<Element> {
-        //TODO implement me
+        val parents = mutableListOf<Element>() // Результат (TODO: странное имя для результирующей коллекции)
+        val matcher = elementsPattern.matcher(string)
+        var lastStartIndex = 0
 
-        loop@ while () {
-            //TODO implement me
-            //groups range for iterate by groups (1..9) or (1..11) optionally
+        loop@ while (matcher.find(lastStartIndex)) {
+            val startIndex = matcher.start()
+            val endIndex = matcher.end()
+
+            // Когда матчер что-то найдет, то весь текст который был до этого - просто текст без md.
+            if (lastStartIndex < startIndex) { //
+                parents.add(Element.Text(string.subSequence(lastStartIndex, startIndex)))
+            }
+
+            // Нашли текст!
+            val text: CharSequence
+
+            // Это индексы групп в регулярке, на которой основан наш матчер.
+            // Данным шагом мы говорим искать элементы для первой, второй, и т.д. групп
+            // (см. MARKDOWN_GROUPS) чтобы затем превратить их в элементы markdown'а.
             val groups = 1..11
-            when () {
+            var group = -1 // индекс найденной в элементе группы
+            for (gr in groups) {
+                if (matcher.group(gr) != null) { // этот метод ищет группу только в диапазоне последнего match'а
+                    group = gr
+                    break
+                }
+            }
+
+            when (group) { // TODO: как нам могут тут помочь именованные регекспы? (урок 5, 1:02:16)
                 //NOT FOUND -> BREAK
                 -1 -> break@loop
 
                 //UNORDERED LIST
                 1 -> {
-                    //text without "*. "
-                    //TODO implement me
+                    text = string.subSequence(startIndex.plus(2), endIndex) //text without "*. "
+                    val subs = findElements(text) // рекурсивно находим вложенные группы
+                    val element = Element.UnorderedListItem(text, subs)
+                    parents.add(element) // добавляем к результирующей коллекции
+
+                    // next find start from position "endIndex" (last regexp character)
+                    lastStartIndex = endIndex
                 }
 
                 //HEADER
                 2 -> {
+                    // регексп для поиска решеток, которых может быть от 1 до 6
+                    val reg = "^#{1,6}".toRegex().find(string.subSequence(startIndex, endIndex))
+                    val level = reg!!.value.length
+
                     //text without "{#} "
-                    //TODO implement me
+                    text = string.subSequence(startIndex.plus(level.inc()), endIndex) // inc() нужен чтобы исключить следующий за решетками пробел
+
+                    val element = Element.Header(level, text)
+                    parents.add(element)
+                    lastStartIndex = endIndex
                 }
 
                 //QUOTE
                 3 -> {
-                    //text without "> "
-                    //TODO implement me
+                    text = string.subSequence(startIndex.plus(2), endIndex) //text without "> "
+                    val subelements = findElements(text)
+                    val element = Element.Quote(text, subelements)
+                    parents.add(element)
+                    lastStartIndex = endIndex
                 }
 
                 //ITALIC
                 4 -> {
-                    //text without "*{}*"
-                    //TODO implement me
+                    text = string.subSequence(startIndex.inc(), endIndex.dec()) //text without "*{}*"
+                    val subelements = findElements(text)
+                    val element = Element.Italic(text, subelements)
+                    parents.add(element)
+                    lastStartIndex = endIndex
                 }
 
                 //BOLD
                 5 -> {
-                    //text without "**{}**"
-                    //TODO implement me
+                    text = string.subSequence(startIndex.plus(2), endIndex.minus(2)) //text without "**{}**"
+                    val subelements = findElements(text)
+                    val element = Element.Bold(text, subelements)
+                    parents.add(element)
+                    lastStartIndex = endIndex
                 }
 
                 //STRIKE
                 6 -> {
-                    //text without "~~{}~~"
-                    //TODO implement me
+                    text = string.subSequence(startIndex.plus(2), endIndex.minus(2)) //text without "~~{}~~"
+                    val subelements = findElements(text)
+                    val element = Element.Strike(text, subelements)
+                    parents.add(element)
+                    lastStartIndex = endIndex
                 }
 
                 //RULE
                 7 -> {
                     //text without "***" insert empty character
-                    //TODO implement me
+                    val element = Element.Rule()
+                    parents.add(element)
+                    lastStartIndex = endIndex
                 }
 
-                //RULE
+                //INLINE
                 8 -> {
-                    //text without "`{}`"
-                    //TODO implement me
+                    text = string.subSequence(startIndex.inc(), endIndex.dec()) //text without "`{}`"
+                    val element = Element.InlineCode(text)
+                    parents.add(element)
+                    lastStartIndex = endIndex
                 }
 
                 //LINK
                 9 -> {
                     //full text for regex
-                    //TODO implement me
+                    text = string.subSequence(startIndex, endIndex)
+                    // TODO: Почитать про деструктурирование
+                    val (titile:String, link:String) = "\\[(.*)]\\((.*)\\)".toRegex().find(text)!!.destructured
+                    val element = Element.Link(link, titile)
+                    parents.add(element)
+                    lastStartIndex = endIndex
+
+                    // Моя реализация, оставленная для сравнения с подходом юзания деструктурирования
+//                    val reg = "\\[.*\\]".toRegex().find(string.subSequence(startIndex, endIndex))
+//                    text = reg?.value!!.subSequence(1, reg.value.length-1)
+//                    val url = string.subSequence(startIndex.inc() + reg.value.length, endIndex.dec()) as String //text without "`{}`"
+//                    val element = Element.Link(url, text)
+//                    parents.add(element)
+//                    lastStartIndex = endIndex
                 }
+
                 //10 -> BLOCK CODE - optionally
                 10 -> {
                     //TODO implement me
@@ -117,11 +191,16 @@ object MarkdownParser {
                     //TODO implement me
                 }
             }
-
         }
 
-        //TODO implement me
-    }
+        if (lastStartIndex < string.length) {
+            val text = string.subSequence(lastStartIndex, string.length)
+            parents.add(Element.Text(text))
+        }
+
+        return parents
+       }
+
 }
 
 data class MarkdownText(val elements: List<Element>)
@@ -130,7 +209,7 @@ sealed class Element() {
     abstract val text: CharSequence
     abstract val elements: List<Element>
 
-    data class Text(
+    data class Text( // TODO: Мне кажется что этот элемент не должен создаваться для символа "\n"
         override val text: CharSequence,
         override val elements: List<Element> = emptyList()
     ) : Element()
@@ -166,13 +245,13 @@ sealed class Element() {
         override val elements: List<Element> = emptyList()
     ) : Element()
 
-    data class Rule(
-        override val text: CharSequence = " ", //for insert span
+    data class Rule( // TODO: если нам не нужно вставлять туда элементы и текст, то зачем под них есть конструктор?
+        override val text: CharSequence = " ", //for insert span // TODO: Учесть в clear()
         override val elements: List<Element> = emptyList()
     ) : Element()
 
     data class InlineCode(
-        override val text: CharSequence, //for insert span
+        override val text: CharSequence, //for insert span // TODO: Почему тут нет " ", а на видео лекции есть? (1:12:37)
         override val elements: List<Element> = emptyList()
     ) : Element()
 
