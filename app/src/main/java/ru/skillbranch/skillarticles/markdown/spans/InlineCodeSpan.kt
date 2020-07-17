@@ -9,7 +9,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
 
-class InlineCodeSpan( // TODO: НЕ РАБОТАЕТ!
+class InlineCodeSpan(
     @ColorInt
     private val textColor: Int,
     @ColorInt
@@ -68,7 +68,7 @@ class InlineCodeSpan( // TODO: НЕ РАБОТАЕТ!
 
         color = textColor
         typeface = Typeface.create(Typeface.MONOSPACE, oldStyle) // TODO: почему нельзя просто юзать констанку MONOSPACE без оборачивания в create()?
-        textSize = 0.95f // процент
+        textSize *= 0.95f // процент
 
         block()
 

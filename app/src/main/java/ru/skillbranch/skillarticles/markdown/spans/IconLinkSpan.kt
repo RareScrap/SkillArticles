@@ -10,7 +10,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
 
-class IconLinkSpan( // TODO: НЕ РАБОТАЕТ!
+class IconLinkSpan(
     private val linkDrawable: Drawable,
     @ColorInt
     private val iconColor: Int,
@@ -68,9 +68,14 @@ class IconLinkSpan( // TODO: НЕ РАБОТАЕТ!
         start: Int,
         end: Int,
         fm: Paint.FontMetricsInt?
-    ): Int {
-        //TODO implement me
-        return 0
+    ): Int { // TODO: Понять как это расчитывается
+        if (fm != null) {
+            iconSize = fm.descent - fm.ascent //fontsize
+            linkDrawable.setBounds(0, 0, iconSize, iconSize)
+            linkDrawable.setTint(iconColor)
+        }
+        textWidth = paint.measureText(text.toString(), start, end)
+        return (iconSize + padding + textWidth).toInt()
     }
 
 
