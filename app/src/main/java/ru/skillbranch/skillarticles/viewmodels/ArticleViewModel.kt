@@ -10,6 +10,7 @@ import ru.skillbranch.skillarticles.extensions.data.toAppSettings
 import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
 import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.indexesOf
+import ru.skillbranch.skillarticles.markdown.MarkdownParser
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
@@ -17,6 +18,7 @@ import ru.skillbranch.skillarticles.viewmodels.base.Notify
 class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleState>(ArticleState()), IArticleViewModel {
 
     private val repository = ArticleRepository
+    private var clearContent: String? = null
 
     init {
         subscribeOnDataSource(getArticleData()) { article, state ->
@@ -93,8 +95,9 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
 
     override fun handleSearch(query: String?) {
         query ?: return // TODO: Нужно?
+        if (clearContent == null) clearContent = MarkdownParser.clear(currentState.content)
         // TODO: Что такое "?"
-        val result = currentState.content
+        val result = clearContent
             .indexesOf(query)
             .map{ it to it + query.length }
         // TODO: Урок 5 (46:57) - у меня такой баг не появлятся. Честно, я даже не понял о чем он говорит

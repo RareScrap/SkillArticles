@@ -1,10 +1,12 @@
 package ru.skillbranch.skillarticles.extensions
 
 import android.content.Context
+import android.content.res.Resources
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.TypedValue
+import androidx.annotation.ColorInt
 
 fun Context.dpToPx(dp: Int): Float {
     return TypedValue.applyDimension(
@@ -37,3 +39,11 @@ val Context.isNetworkAvailable: Boolean
             cm.activeNetworkInfo?.run { isConnectedOrConnecting } ?: false
         }
     }
+
+// TODO: Почистить от говна
+@ColorInt
+fun Context.attrValue(resId: Int): Int {
+    val tv = TypedValue()
+    if (theme.resolveAttribute(resId, tv, true)) return tv.data
+    else throw Resources.NotFoundException("Resource with id $resId not found")
+}
