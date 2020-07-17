@@ -46,7 +46,32 @@ object MarkdownParser {
      * clear markdown text to string without markdown characters
      */
     fun clear(string: String?): String? {
-        return null
+        string ?: return null
+
+        val sb = StringBuilder()
+        findElements(string)
+            .spread()
+            .filter { it.elements.isEmpty() }
+            .forEach { sb.append(it.text) }
+
+        return sb.toString()
+    }
+
+    // TODO: Вынести в extension или другим образом устранить копирование из ExampleUnitTest
+    private fun Element.spread():List<Element>{
+        val elements = mutableListOf<Element>()
+        elements.add(this)
+        elements.addAll(this.elements.spread())
+        return elements
+    }
+
+    private fun List<Element>.spread():List<Element>{
+        val elements = mutableListOf<Element>()
+        if(this.isNotEmpty()) elements.addAll(
+            // TODO: Как это работает?
+            this.fold(mutableListOf()){acc, el -> acc.also { it.addAll(el.spread()) }}
+        )
+        return elements
     }
 
     /**
