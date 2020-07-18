@@ -23,12 +23,13 @@ object MarkdownParser {
     private const val INLINE_GROUP = "((?<!`)`[^`\\s].*?[^`\\s]?`(?!`))"
     // TODO: зачем нам вторая часть регулярки если первая и так проходит тест?
     private const val LINK_GROUP = "(\\[[^\\[\\]]*?]\\(.+?\\)|^\\[*?]\\(.*?\\))" // мое решение - "(\\[.*\\]\\(.*\\))"
-    private const val BLOCK_CODE_GROUP = "" //TODO implement me
+    private const val BLOCK_CODE_GROUP = "(^```[\\s\\S]*?```)"
     private const val ORDER_LIST_GROUP = "" //TODO implement me
 
     //result regex
     private const val MARKDOWN_GROUPS = "$UNORDERED_LIST_ITEM_GROUP|$HEADER_GROUP|$QUOTE_GROUP" +
-            "|$ITALIC_GROUP|$BOLD_GROUP|$STRIKE_GROUP|$RULE_GROUP|$INLINE_GROUP|$LINK_GROUP"
+            "|$ITALIC_GROUP|$BOLD_GROUP|$STRIKE_GROUP|$RULE_GROUP|$INLINE_GROUP|$LINK_GROUP" +
+            "|$BLOCK_CODE_GROUP"
     //|$BLOCK_CODE_GROUP|$ORDER_LIST_GROUP optionally
 
     private val elementsPattern by lazy { Pattern.compile(MARKDOWN_GROUPS, Pattern.MULTILINE) }
@@ -207,8 +208,28 @@ object MarkdownParser {
                 }
 
                 //10 -> BLOCK CODE - optionally
-                10 -> {
-                    //TODO implement me
+                10 -> { // TODO: Говнокод
+                    text = string.subSequence(startIndex+3, endIndex-3)
+                    val elements = mutableListOf<Element.BlockCode>()
+                    val codeStrings = text.split("\n")
+
+                    if (codeStrings.size == 1) {
+                        elements.add(Element.BlockCode(Element.BlockCode.Type.SINGLE, codeStrings.first()))
+                    }
+                    else { // TODO: А если == 0?
+                        elements.add(Element.BlockCode(Element.BlockCode.Type.START, codeStrings.first()+"\n"))
+
+                        for (i in 1 until codeStrings.size-1) {
+                            elements.add(Element.BlockCode(Element.BlockCode.Type.MIDDLE, codeStrings[i]+"\n"))
+                        }
+
+                        elements.add(Element.BlockCode(Element.BlockCode.Type.END, codeStrings.last()))
+                    }
+
+
+//                    val element = Element.BlockCode(text = text, elements = elements)
+                    parents.addAll(elements)
+                    lastStartIndex = endIndex
                 }
 
                 //11 -> NUMERIC LIST
