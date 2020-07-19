@@ -24,13 +24,12 @@ object MarkdownParser {
     // TODO: зачем нам вторая часть регулярки если первая и так проходит тест?
     private const val LINK_GROUP = "(\\[[^\\[\\]]*?]\\(.+?\\)|^\\[*?]\\(.*?\\))" // мое решение - "(\\[.*\\]\\(.*\\))"
     private const val BLOCK_CODE_GROUP = "(^```[\\s\\S]*?```)"
-    private const val ORDER_LIST_GROUP = "" //TODO implement me
+    private const val ORDER_LIST_GROUP = "(^\\d\\. .+$)"
 
     //result regex
     private const val MARKDOWN_GROUPS = "$UNORDERED_LIST_ITEM_GROUP|$HEADER_GROUP|$QUOTE_GROUP" +
             "|$ITALIC_GROUP|$BOLD_GROUP|$STRIKE_GROUP|$RULE_GROUP|$INLINE_GROUP|$LINK_GROUP" +
-            "|$BLOCK_CODE_GROUP"
-    //|$BLOCK_CODE_GROUP|$ORDER_LIST_GROUP optionally
+            "|$BLOCK_CODE_GROUP|$ORDER_LIST_GROUP"
 
     private val elementsPattern by lazy { Pattern.compile(MARKDOWN_GROUPS, Pattern.MULTILINE) }
 
@@ -234,7 +233,16 @@ object MarkdownParser {
 
                 //11 -> NUMERIC LIST
                 11 -> {
-                    //TODO implement me
+                    val rawText = string.subSequence(startIndex, endIndex)
+                    val delimIndex = rawText.indexOf(".")
+
+                    text = string.subSequence(startIndex + delimIndex + 2, endIndex) //text without "1. "
+                    val order = string.substring(startIndex, startIndex + delimIndex)
+
+                    val subs = findElements(text)
+                    val element = Element.OrderedListItem(order, text, subs)
+                    parents.add(element)
+                    lastStartIndex = endIndex
                 }
             }
         }
