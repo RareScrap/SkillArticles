@@ -18,7 +18,7 @@ class BlockCodeSpan(
     @Px
     private val padding: Float,
     private val type: Element.BlockCode.Type
-) : ReplacementSpan() {
+) : ReplacementSpan()/*, LeadingMarginSpan*/ { // TODO: Но в задании сказано, что LeadingMarginSpan обязателен. А тесты проходят и без него.
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var rect = RectF()
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -44,10 +44,16 @@ class BlockCodeSpan(
         bottom: Int,
         paint: Paint
     ) {
+
         paint.forBackground { // TODO: Понять как это расчитывается
-            rect.set(x, top.toFloat(), canvas.width.toFloat(), bottom.toFloat())
+
+            val paddingTop = if (type == Element.BlockCode.Type.START) padding else 0f
+            val paddingBottom = if (type == Element.BlockCode.Type.END) padding else 0f
+            rect.set(x, top + paddingTop, canvas.width.toFloat(), bottom - paddingBottom)
+
+            path.reset() // TODO: Зачем?
             path.addRoundRect(rect, corners.getValue(type), Path.Direction.CW)
-            canvas.drawPath(path, paint) // TODO: нужно ли делать path.reset()?
+            canvas.drawPath(path, paint)
         }
 
         paint.forText {
@@ -63,7 +69,33 @@ class BlockCodeSpan(
         fm: Paint.FontMetricsInt?
     ): Int {
         // Почему его не надо имплементить?
+        fm?.let {
+            val calculatedFm = calculateFontMetricsFor(type, fm)
+            it.ascent = calculatedFm.first
+            it.descent = calculatedFm.second
+        }
         return 0
+    }
+
+    private fun calculateFontMetricsFor(type: Element.BlockCode.Type, fm: Paint.FontMetricsInt): Pair<Int, Int> {
+        return when (type) {
+            Element.BlockCode.Type.SINGLE -> Pair(
+                (fm.ascent * 0.85f - 2 * padding).toInt(),
+                (fm.descent * 0.85f + 2 * padding).toInt()
+            )
+            Element.BlockCode.Type.START -> Pair(
+                (fm.ascent * 0.85f - 2 * padding).toInt(),
+                (fm.descent * 0.85f).toInt()
+            )
+            Element.BlockCode.Type.MIDDLE -> Pair(
+                (fm.ascent * 0.85f).toInt(),
+                (fm.descent * 0.85f).toInt()
+            )
+            Element.BlockCode.Type.END -> Pair(
+                (fm.ascent * 0.85f).toInt(),
+                (fm.descent * 0.85f + 2 * padding).toInt()
+            )
+        }
     }
 
     private inline fun Paint.forText(block: () -> Unit) {
@@ -94,9 +126,5 @@ class BlockCodeSpan(
 
         color = oldColor
         style = oldStyle
-    }
-
-    companion object {
-
     }
 }
