@@ -19,7 +19,7 @@ class OrderedListSpan(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 
     override fun getLeadingMargin(first: Boolean): Int {
-        return (order.length.inc() * gapWidth).toInt()
+        return (order.length.inc() * gapWidth).toInt() // Говнисто выглядит. Вот так намного лучше "order.length.inc() * gapWidth + gapWidth"
     }
 
     override fun drawLeadingMargin(
