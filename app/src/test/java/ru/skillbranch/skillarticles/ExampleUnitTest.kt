@@ -1,7 +1,6 @@
 package ru.skillbranch.skillarticles
 
 import org.junit.Assert.assertEquals
-import org.junit.Ignore
 import org.junit.Test
 import ru.skillbranch.skillarticles.markdown.Element
 import ru.skillbranch.skillarticles.markdown.MarkdownParser
@@ -167,7 +166,7 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun clear_all() {
+    fun clear_all() { // не запустится, если не исключить Element.OrderedListItem и Element.BlockCode
         val result = MarkdownParser.clear(markdownString)
         assertEquals(markdownClearString,  result)
     }
