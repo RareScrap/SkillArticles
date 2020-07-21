@@ -237,7 +237,7 @@ object MarkdownParser {
                     val delimIndex = rawText.indexOf(".")
 
                     text = string.subSequence(startIndex + delimIndex + 2, endIndex) //text without "1. "
-                    val order = string.substring(startIndex, startIndex + delimIndex)
+                    val order = string.substring(startIndex, startIndex + delimIndex + 1) // number with dot
 
                     val subs = findElements(text)
                     val element = Element.OrderedListItem(order, text, subs)
