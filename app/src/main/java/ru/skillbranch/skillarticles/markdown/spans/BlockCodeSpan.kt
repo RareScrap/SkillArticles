@@ -70,30 +70,30 @@ class BlockCodeSpan(
     ): Int {
         // Почему его не надо имплементить?
         fm?.let {
-            val calculatedFm = calculateFontMetricsFor(type, fm)
+            val calculatedFm = calculateFontMetricsFor(type, paint) // TODO: Почему тесты проходят если брать descent из paint'а, но не проходят если брать descent из fm-параметра метода?
             it.ascent = calculatedFm.first
             it.descent = calculatedFm.second
         }
         return 0
     }
 
-    private fun calculateFontMetricsFor(type: Element.BlockCode.Type, fm: Paint.FontMetricsInt): Pair<Int, Int> {
+    private fun calculateFontMetricsFor(type: Element.BlockCode.Type, paint: Paint): Pair<Int, Int> {
         return when (type) {
             Element.BlockCode.Type.SINGLE -> Pair(
-                (fm.ascent * 0.85f - 2 * padding).toInt(),
-                (fm.descent * 0.85f + 2 * padding).toInt()
+                (paint.ascent() - 2 * padding).toInt(),
+                (paint.descent() + 2 * padding).toInt()
             )
             Element.BlockCode.Type.START -> Pair(
-                (fm.ascent * 0.85f - 2 * padding).toInt(),
-                (fm.descent * 0.85f).toInt()
+                (paint.ascent() - 2 * padding).toInt(),
+                (paint.descent()).toInt()
             )
             Element.BlockCode.Type.MIDDLE -> Pair(
-                (fm.ascent * 0.85f).toInt(),
-                (fm.descent * 0.85f).toInt()
+                (paint.ascent()).toInt(),
+                (paint.descent()).toInt()
             )
             Element.BlockCode.Type.END -> Pair(
-                (fm.ascent * 0.85f).toInt(),
-                (fm.descent * 0.85f + 2 * padding).toInt()
+                (paint.ascent()).toInt(),
+                (paint.descent() + 2 * padding).toInt()
             )
         }
     }

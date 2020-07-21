@@ -146,7 +146,7 @@ class InstrumentedTest2 {
         text.setSpan(spanStart, 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
         //check lineHeight START type
-//            fm.ascent = defaultAscent // TODO: Скорее всего опечатка в тестах
+//            fm.ascent = defaultAscent // TODO: Я думал что это опечатка, но все еще интереснее. Тест пройдет если в getSize() брать descent из paint'а, вместо того чтобы юзать тот, что передается fm-параметром. Почему?!
 //            fm.descent = defaultDescent
         spanStart.getSize(paint, text, 0, text.length, fm)
         assertEquals((defaultAscent * 0.85f - 2 * padding).toInt(), fm.ascent)
