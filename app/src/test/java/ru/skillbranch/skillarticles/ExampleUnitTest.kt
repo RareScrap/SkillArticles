@@ -3,8 +3,8 @@ package ru.skillbranch.skillarticles
 import org.junit.Assert.assertEquals
 import org.junit.Ignore
 import org.junit.Test
-import ru.skillbranch.skillarticles.markdown.Element
-import ru.skillbranch.skillarticles.markdown.MarkdownParser
+import ru.skillbranch.skillarticles.data.repositories.Element
+import ru.skillbranch.skillarticles.data.repositories.MarkdownParser
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -247,7 +247,7 @@ class ExampleUnitTest {
         return elements
     }
 
-    private inline fun <reified T:Element> prepare(list:List<Element>) : List<String>{
+    private inline fun <reified T: Element> prepare(list:List<Element>) : List<String>{
         return list // TODO: Как это работает?
             .fold(mutableListOf<Element>()){ acc, el -> //spread inner elements
                 acc.also { it.addAll(el.spread()) }

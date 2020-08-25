@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.markdown
+package ru.skillbranch.skillarticles.data.repositories
 
 import java.util.regex.Pattern
 
