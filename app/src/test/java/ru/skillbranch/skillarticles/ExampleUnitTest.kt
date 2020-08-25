@@ -1,6 +1,7 @@
 package ru.skillbranch.skillarticles
 
 import org.junit.Assert.assertEquals
+import org.junit.Ignore
 import org.junit.Test
 import ru.skillbranch.skillarticles.markdown.Element
 import ru.skillbranch.skillarticles.markdown.MarkdownParser

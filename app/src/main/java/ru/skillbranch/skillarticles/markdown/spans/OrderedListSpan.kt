@@ -42,7 +42,7 @@ class OrderedListSpan(
 
     private inline fun Paint.withCustomColor(block: () -> Unit) {
         val oldColor = color
-        val oldStyle = style
+        val oldStyle = style // TODO: В уроке 6 не юзается сохранение стиля (42:35)
 
         color = orderColor
         style = Paint.Style.FILL

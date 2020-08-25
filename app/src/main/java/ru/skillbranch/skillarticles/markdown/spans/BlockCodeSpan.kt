@@ -24,15 +24,6 @@ class BlockCodeSpan(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var path = Path()
 
-    private val corner = floatArrayOf(cornerRadius, cornerRadius)
-    private val notCorner = floatArrayOf(0f, 0f)
-    private val corners = mapOf(
-        Element.BlockCode.Type.SINGLE to corner + corner + corner + corner,
-        Element.BlockCode.Type.START to corner + corner + notCorner + notCorner,
-        Element.BlockCode.Type.MIDDLE to notCorner + notCorner + notCorner + notCorner,
-        Element.BlockCode.Type.END to notCorner + notCorner + corner + corner
-    )
-
     override fun draw(
         canvas: Canvas,
         text: CharSequence,
@@ -45,15 +36,48 @@ class BlockCodeSpan(
         paint: Paint
     ) {
 
-        paint.forBackground { // TODO: Понять как это расчитывается
-
-            val paddingTop = if (type == Element.BlockCode.Type.START) padding else 0f
-            val paddingBottom = if (type == Element.BlockCode.Type.END) padding else 0f
-            rect.set(x, top + paddingTop, canvas.width.toFloat(), bottom - paddingBottom)
-
-            path.reset() // TODO: Зачем?
-            path.addRoundRect(rect, corners.getValue(type), Path.Direction.CW)
-            canvas.drawPath(path, paint)
+        // TODO: Понять как это расчитывается
+        when (type) {
+            Element.BlockCode.Type.START -> {
+                paint.forBackground {
+                    val corners = floatArrayOf(
+                        cornerRadius, cornerRadius,   // top-left radius in px
+                        cornerRadius, cornerRadius,   // top-right radius in px
+                        0f, 0f,   // bottom-right radius in px
+                        0f, 0f    // bottom-left radius in px
+                    )
+                    rect.set(0f, top + padding, canvas.width.toFloat(), bottom.toFloat())
+                    path.reset()
+                    path.addRoundRect(rect, corners, Path.Direction.CW)
+                    canvas.drawPath(path, paint)
+                }
+            }
+            Element.BlockCode.Type.END -> {
+                paint.forBackground {
+                    val corners = floatArrayOf(
+                        0f, 0f,     // top-left radius in px
+                        0f, 0f,     // top-right radius in px
+                        cornerRadius, cornerRadius,   // bottom-right radius in px
+                        cornerRadius, cornerRadius    // bottom-left radius in px
+                    )
+                    rect.set(0f, top.toFloat(), canvas.width.toFloat(), bottom - padding)
+                    path.reset()
+                    path.addRoundRect(rect, corners, Path.Direction.CW)
+                    canvas.drawPath(path, paint)
+                }
+            }
+            Element.BlockCode.Type.MIDDLE -> {
+                paint.forBackground {
+                    rect.set(0f, top.toFloat(), canvas.width.toFloat(), bottom.toFloat())
+                    canvas.drawRect(rect, paint)
+                }
+            }
+            Element.BlockCode.Type.SINGLE -> {
+                paint.forBackground {
+                    rect.set(0f, top + padding, canvas.width.toFloat(), bottom - padding)
+                    canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
+                }
+            }
         }
 
         paint.forText {
@@ -68,34 +92,31 @@ class BlockCodeSpan(
         end: Int,
         fm: Paint.FontMetricsInt?
     ): Int {
-        // Почему его не надо имплементить?
-        fm?.let {
-            val calculatedFm = calculateFontMetricsFor(type, paint) // TODO: Почему тесты проходят если брать descent из paint'а, но не проходят если брать descent из fm-параметра метода?
-            it.ascent = calculatedFm.first
-            it.descent = calculatedFm.second
-        }
-        return 0
-    }
 
-    private fun calculateFontMetricsFor(type: Element.BlockCode.Type, paint: Paint): Pair<Int, Int> {
-        return when (type) {
-            Element.BlockCode.Type.SINGLE -> Pair(
-                (paint.ascent() - 2 * padding).toInt(),
-                (paint.descent() + 2 * padding).toInt()
-            )
-            Element.BlockCode.Type.START -> Pair(
-                (paint.ascent() - 2 * padding).toInt(),
-                (paint.descent()).toInt()
-            )
-            Element.BlockCode.Type.MIDDLE -> Pair(
-                (paint.ascent()).toInt(),
-                (paint.descent()).toInt()
-            )
-            Element.BlockCode.Type.END -> Pair(
-                (paint.ascent()).toInt(),
-                (paint.descent() + 2 * padding).toInt()
-            )
+        if (fm != null) {
+            when (type) { // TODO: Почему тесты проходят если брать descent из paint'а, но не проходят если брать descent из fm-параметра метода?
+                Element.BlockCode.Type.START -> {
+                    fm.ascent = paint.ascent().toInt()
+                    fm.descent = (paint.descent() + 2 * padding).toInt()
+                }
+                Element.BlockCode.Type.END -> {
+                    fm.ascent = paint.ascent().toInt()
+                    fm.descent = paint.descent().toInt()
+                }
+                Element.BlockCode.Type.MIDDLE -> {
+                    fm.ascent = (paint.ascent() - 2 * padding).toInt()
+                    fm.descent = paint.descent().toInt()
+                }
+                Element.BlockCode.Type.SINGLE -> {
+                    fm.ascent = (paint.ascent() - 2 * padding).toInt()
+                    fm.descent = (paint.descent() + 2 * padding).toInt()
+                }
+            }
+            fm.top = fm.ascent
+            fm.bottom = fm.descent
         }
+
+        return 0 // Почему его не надо расчитывать?
     }
 
     private inline fun Paint.forText(block: () -> Unit) {

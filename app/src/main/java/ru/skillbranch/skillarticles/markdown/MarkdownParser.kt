@@ -23,8 +23,8 @@ object MarkdownParser {
     private const val INLINE_GROUP = "((?<!`)`[^`\\s].*?[^`\\s]?`(?!`))"
     // TODO: зачем нам вторая часть регулярки если первая и так проходит тест?
     private const val LINK_GROUP = "(\\[[^\\[\\]]*?]\\(.+?\\)|^\\[*?]\\(.*?\\))" // мое решение - "(\\[.*\\]\\(.*\\))"
-    private const val BLOCK_CODE_GROUP = "(^```[\\s\\S]*?```)"
-    private const val ORDER_LIST_GROUP = "(^\\d\\. .+$)"
+    private const val BLOCK_CODE_GROUP = "(^```[\\s\\S]*?```)" // TODO: В уроке 6 юзается "(^```[\\s\\S]+?```$)"
+    private const val ORDER_LIST_GROUP = "(^\\d\\. .+$)" // TODO: В уроке 6 юзается "(^\\d[1,2]\\.\\s.+?$)"
 
     //result regex
     private const val MARKDOWN_GROUPS = "$UNORDERED_LIST_ITEM_GROUP|$HEADER_GROUP|$QUOTE_GROUP" +
@@ -207,40 +207,44 @@ object MarkdownParser {
                 }
 
                 //10 -> BLOCK CODE - optionally
-                10 -> { // TODO: Говнокод
-                    text = string.subSequence(startIndex+3, endIndex-3)
-                    val elements = mutableListOf<Element.BlockCode>()
-                    val codeStrings = text.split("\n")
+                10 -> {
+                    text = string.subSequence(startIndex+3, endIndex-3).toString() // TODO: Зачем каст к String?
 
-                    if (codeStrings.size == 1) {
-                        elements.add(Element.BlockCode(Element.BlockCode.Type.SINGLE, codeStrings.first()))
-                    }
-                    else { // TODO: А если == 0?
-                        elements.add(Element.BlockCode(Element.BlockCode.Type.START, codeStrings.first()+"\n"))
-
-                        for (i in 1 until codeStrings.size-1) {
-                            elements.add(Element.BlockCode(Element.BlockCode.Type.MIDDLE, codeStrings[i]+"\n"))
+                    if (text.contains(LINE_SEPARATOR)) {
+                        for ((index, line) in text.lines().withIndex()) {
+                            when (index) {
+                                text.lines().lastIndex -> parents.add( // TODO: Действительно нужно опять вызывать lines()? Нельзя юзать уже созданный список?
+                                    Element.BlockCode(
+                                        Element.BlockCode.Type.END,
+                                        line
+                                    )
+                                )
+                                0 -> parents.add(
+                                    Element.BlockCode(
+                                        Element.BlockCode.Type.START,
+                                        line + LINE_SEPARATOR
+                                    )
+                                )
+                                else -> parents.add(
+                                    Element.BlockCode(
+                                        Element.BlockCode.Type.MIDDLE,
+                                        line + LINE_SEPARATOR
+                                    )
+                                )
+                            }
                         }
+                    } else parents.add(Element.BlockCode(Element.BlockCode.Type.SINGLE, text))
 
-                        elements.add(Element.BlockCode(Element.BlockCode.Type.END, codeStrings.last()))
-                    }
-
-
-//                    val element = Element.BlockCode(text = text, elements = elements)
-                    parents.addAll(elements)
                     lastStartIndex = endIndex
                 }
 
                 //11 -> NUMERIC LIST
                 11 -> {
-                    val rawText = string.subSequence(startIndex, endIndex)
-                    val delimIndex = rawText.indexOf(".")
-
-                    text = string.subSequence(startIndex + delimIndex + 2, endIndex) //text without "1. "
-                    val order = string.substring(startIndex, startIndex + delimIndex + 1) // number with dot
-
+                    val reg = "(^\\d{1,2}.)".toRegex().find(string.substring(startIndex, endIndex))
+                    val order = reg!!.value
+                    text = string.subSequence(startIndex + order.length.inc(), endIndex).toString() // text without "1. "
                     val subs = findElements(text)
-                    val element = Element.OrderedListItem(order, text, subs)
+                    val element = Element.OrderedListItem(order, text.toString(), subs) // TODO: Зачем каст к String?
                     parents.add(element)
                     lastStartIndex = endIndex
                 }
@@ -253,7 +257,7 @@ object MarkdownParser {
         }
 
         return parents
-       }
+    }
 
 }
 
